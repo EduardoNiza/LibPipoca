@@ -1,0 +1,163 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+                0x0000000000000000                . = 0x0
+
+.reset          0x0000000000000000       0x28
+ *(.reset)
+ .reset         0x0000000000000000       0x28 startup.o
+                0x0000000000008000                . = 0x8000
+
+.text           0x0000000000008000      0x4f4
+ *(.text)
+ .text          0x0000000000008000       0xd0 main.o
+                0x0000000000008000                trata_irq
+                0x0000000000008074                main
+ .text          0x00000000000080d0       0xc0 botao.o
+                0x00000000000080d0                trata_irq_ext0
+                0x0000000000008100                inicia_botao
+ .text          0x0000000000008190      0x1b8 serial.o
+                0x0000000000008190                trata_irq_uart0_tx
+                0x0000000000008220                strlen
+                0x0000000000008278                serie
+                0x00000000000082e8                inicia_serial
+ .text          0x0000000000008348      0x15c timer.o
+                0x0000000000008348                trata_irq_timer0
+                0x0000000000008378                get_ticks
+                0x00000000000083d4                delay_tempo
+                0x000000000000841c                inicia_timer0
+ .text          0x00000000000084a4       0x50 startup.o
+                0x00000000000084a4                start
+                0x00000000000084dc                delay
+
+.rodata         0x00000000000084f4       0x10
+ .rodata        0x00000000000084f4       0x10 main.o
+
+.glue_7         0x0000000000008504        0x0
+ .glue_7        0x0000000000008504        0x0 linker stubs
+
+.glue_7t        0x0000000000008504        0x0
+ .glue_7t       0x0000000000008504        0x0 linker stubs
+
+.vfp11_veneer   0x0000000000008504        0x0
+ .vfp11_veneer  0x0000000000008504        0x0 linker stubs
+
+.v4_bx          0x0000000000008504        0x0
+ .v4_bx         0x0000000000008504        0x0 linker stubs
+
+.iplt           0x0000000000008504        0x0
+ .iplt          0x0000000000008504        0x0 main.o
+
+.rel.dyn        0x0000000000008504        0x0
+ .rel.iplt      0x0000000000008504        0x0 main.o
+
+.data           0x0000000000008504        0x0
+ *(.data)
+ .data          0x0000000000008504        0x0 main.o
+ .data          0x0000000000008504        0x0 botao.o
+ .data          0x0000000000008504        0x0 serial.o
+ .data          0x0000000000008504        0x0 timer.o
+ .data          0x0000000000008504        0x0 startup.o
+                0x0000000000008504                inicio_bss = .
+
+.igot.plt       0x0000000000008504        0x0
+ .igot.plt      0x0000000000008504        0x0 main.o
+
+.bss            0x0000000000008504        0xc
+ *(.bss)
+ .bss           0x0000000000008504        0x0 main.o
+ .bss           0x0000000000008504        0x0 botao.o
+ .bss           0x0000000000008504        0x8 serial.o
+ .bss           0x000000000000850c        0x4 timer.o
+ .bss           0x0000000000008510        0x0 startup.o
+                0x0000000000008510                . = ALIGN (0x4)
+                0x0000000000008510                fim_bss = .
+                0x0000000000009510                . = (. + 0x1000)
+                0x0000000000009510                . = ALIGN (0x8)
+                0x0000000000009510                inicio_stack = .
+LOAD main.o
+LOAD botao.o
+LOAD serial.o
+LOAD timer.o
+LOAD startup.o
+OUTPUT(kernel.elf elf32-littlearm)
+LOAD linker stubs
+
+.debug_info     0x0000000000000000     0x265d
+ .debug_info    0x0000000000000000      0x95a main.o
+ .debug_info    0x000000000000095a      0x946 botao.o
+ .debug_info    0x00000000000012a0      0x9e1 serial.o
+ .debug_info    0x0000000000001c81      0x9ba timer.o
+ .debug_info    0x000000000000263b       0x22 startup.o
+
+.debug_abbrev   0x0000000000000000      0x852
+ .debug_abbrev  0x0000000000000000      0x1fc main.o
+ .debug_abbrev  0x00000000000001fc      0x1cf botao.o
+ .debug_abbrev  0x00000000000003cb      0x232 serial.o
+ .debug_abbrev  0x00000000000005fd      0x243 timer.o
+ .debug_abbrev  0x0000000000000840       0x12 startup.o
+
+.debug_aranges  0x0000000000000000       0xa8
+ .debug_aranges
+                0x0000000000000000       0x20 main.o
+ .debug_aranges
+                0x0000000000000020       0x20 botao.o
+ .debug_aranges
+                0x0000000000000040       0x20 serial.o
+ .debug_aranges
+                0x0000000000000060       0x20 timer.o
+ .debug_aranges
+                0x0000000000000080       0x28 startup.o
+
+.debug_line     0x0000000000000000      0x505
+ .debug_line    0x0000000000000000      0x123 main.o
+ .debug_line    0x0000000000000123       0xf6 botao.o
+ .debug_line    0x0000000000000219      0x151 serial.o
+ .debug_line    0x000000000000036a      0x137 timer.o
+ .debug_line    0x00000000000004a1       0x64 startup.o
+
+.debug_str      0x0000000000000000      0x5ad
+ .debug_str     0x0000000000000000      0x4f0 main.o
+                                        0x542 (size before relaxing)
+ .debug_str     0x00000000000004f0       0x24 botao.o
+                                        0x54b (size before relaxing)
+ .debug_str     0x0000000000000514       0x3f serial.o
+                                        0x566 (size before relaxing)
+ .debug_str     0x0000000000000553       0x44 timer.o
+                                        0x571 (size before relaxing)
+ .debug_str     0x0000000000000597       0x16 startup.o
+                                         0x4b (size before relaxing)
+
+.comment        0x0000000000000000       0x59
+ .comment       0x0000000000000000       0x59 main.o
+                                         0x5a (size before relaxing)
+ .comment       0x0000000000000059       0x5a botao.o
+ .comment       0x0000000000000059       0x5a serial.o
+ .comment       0x0000000000000059       0x5a timer.o
+
+.ARM.attributes
+                0x0000000000000000       0x25
+ .ARM.attributes
+                0x0000000000000000       0x27 main.o
+ .ARM.attributes
+                0x0000000000000027       0x27 botao.o
+ .ARM.attributes
+                0x000000000000004e       0x27 serial.o
+ .ARM.attributes
+                0x0000000000000075       0x27 timer.o
+ .ARM.attributes
+                0x000000000000009c       0x12 startup.o
+
+.debug_frame    0x0000000000000000      0x1c8
+ .debug_frame   0x0000000000000000       0x58 main.o
+ .debug_frame   0x0000000000000058       0x50 botao.o
+ .debug_frame   0x00000000000000a8       0x90 serial.o
+ .debug_frame   0x0000000000000138       0x90 timer.o
+
+.debug_ranges   0x0000000000000000       0x20
+ .debug_ranges  0x0000000000000000       0x20 startup.o
