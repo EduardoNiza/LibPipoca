@@ -2,7 +2,7 @@
 #
 # Lista dos arquivos fonte
 #
-FONTES = main.c botao.c serial.c timer.c startup.s
+FONTES = main.c pipoca.c startup.s
 
 #
 # Arquivos de saída 
