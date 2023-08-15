@@ -48,18 +48,13 @@ void delayms(uint32_t v) {
 /**
  * Tratamento das interrupções do ARM.
  */
-void __attribute__((interrupt("IRQ")))
-trata_irq(void) {
+void __attribute__((interrupt("IRQ"))) trata_irq(void) {
    /*
     * Verifica causa da interrupção.
     */
    uint32_t pend = INTPND;
    if(bit_is_set(pend, 10)) trata_irq_timer0();
    if(bit_is_set(pend, 4)) trata_irq_uart0_tx();
-   if(bit_is_set(pend, 0)) interr_ext0();
-   if(bit_is_set(pend, 1)) interr_ext1();
-   if(bit_is_set(pend, 2)) interr_ext2();
-   if(bit_is_set(pend, 3)) interr_ext3();
 
    /*
     * Reconhece todas as interrupções.
@@ -101,7 +96,7 @@ void UsaGPIO(uint8_t pino, uint8_t modo){ //declaração do pino
         bit_clr(INTMSK, (pino-8)); // habilita interrupção do pino
         bit_clr(INTMSK, 21);     // habilita interrupções globais
     }
-    else
+    else if (modo == INPUT)
         bit_clr(IOPMOD, pino); // INPUT se houver exceção
 
 }
@@ -168,10 +163,18 @@ void IniciaSerial(uint16_t baud) {
 	UBRDIV0 = (162 << 4); // 162, valor para 9600 em 50 MHz
    }
    bit_clr(INTMSK, 4);    // habilita interrupção da transmissão.
-   bit_clr(INTMSK, 5);    // habilita interrupção da recepção.
+   //bit_clr(INTMSK, 5);    // habilita interrupção da recepção.
 }
 
-void svrsetup(void){
-    inicia_timer0();
+
+int main(void) {
+
+inicia_timer0();
+setup();
+
+for(;;)
+	loop();
+
 }
+
 

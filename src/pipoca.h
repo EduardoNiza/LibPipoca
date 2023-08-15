@@ -33,6 +33,7 @@
 void trata_irq_timer0(void);
 uint32_t get_ticks(void);
 void svrsetup(void);
+void __attribute__((interrupt("IRQ"))) trata_irq(void);
 void delayms(uint32_t v);
 void inicia_timer0(void);
 void interr_ext0(void);

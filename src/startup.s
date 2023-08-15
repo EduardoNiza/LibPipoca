@@ -48,10 +48,9 @@ next:
    bge cont
    str r0, [r1], #4
    b next;
+   
 cont:
-   b svrsetup;
-   b loop;
-
+   b main
 /*
  * Função utilitária delay.
  */
