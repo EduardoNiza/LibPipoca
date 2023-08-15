@@ -32,13 +32,14 @@
 
 void trata_irq_timer0(void);
 uint32_t get_ticks(void);
+void svrsetup(void);
 void delayms(uint32_t v);
 void inicia_timer0(void);
 void interr_ext0(void);
 void interr_ext1(void);
 void interr_ext2(void);
 void interr_ext3(void);
-void Serial(char *str);
+void SerialEnvia(char *str);
 void IniciaSerial(uint16_t baud);
 
 void UsaGPIO(uint8_t pino, uint8_t modo);

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vetor de interrupções.
  */
 .section .reset, "ax"
@@ -20,7 +20,7 @@ panic:
   b panic
 
 .text
-.global start
+.global delay, start
 
 /*
  * Ponto de entrada do programa.
@@ -50,5 +50,13 @@ next:
    b next;
 cont:
    b svrsetup;
-   b setup;
    b loop;
+
+/*
+ * Função utilitária delay.
+ */
+delay:
+   subs r0, r0, #1
+   bne delay
+   mov pc, lr
+

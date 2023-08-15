@@ -3,6 +3,9 @@
 #include "evlt7t.h"
 #include "pipoca.h"
 
+
+void trata_irq_uart0_tx(void);
+void SerialEnvia(char *str);
 /**
  * Tratamento da interrupção externa 0 (sinal P8, conectado ao botão).
  * Pisca o segundo led.
@@ -144,7 +147,7 @@ void SerialEnvia(char *str) {
  * Configura a UART 0 (serial do usuário).
  * (somente transmissão)
  */
-void IniciaSerial(suint16_t baud) {
+void IniciaSerial(uint16_t baud) {
    ULCON0 = 0b111;           // 8N2, sem paridade, clock interno
    UCON0 = 0b1001;           // TX e RX habilitado
    if (baud == 115200){
