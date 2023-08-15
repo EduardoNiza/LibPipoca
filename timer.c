@@ -10,7 +10,6 @@ volatile static uint32_t ticks;
 
 /**
  * Tratamento da interrupção do timer 0.
- * Chamado por trata_irq().
  */
 void 
 trata_irq_timer0(void) {
