@@ -7,28 +7,6 @@
  * Tratamento da interrupção externa 0 (sinal P8, conectado ao botão).
  * Pisca o segundo led.
  */
-void trata_irq_ext0(void) {
-   bit_inv(IOPDATA, 5);
-}
-
-/**
- * Função de inicialização do tratamento da interrupção do botão.
- */
-void 
-inicia_botao(void) {
-   /*
-    * Configura a saída do led.
-    */
-   bit_set(IOPMOD, 5);     // configura o pino 5 como saída (segundo led).
-   bit_clr(IOPDATA, 5);    // inicia o led apagado.
-
-   /*
-    * Configura P8 como entrada com interrupção.
-    */
-   bit_clr(IOPMOD, 8);
-   IOPCON = (IOPCON & ~(0b11111)) | 0b11001;   // borda de subida
-   bit_clr(INTMSK, 0);      // habilita interrupção externa 0
-}
 
 /**
  * Base de tempo do sistema, incrementado a cada 1 milissegundo.
@@ -57,11 +35,33 @@ uint32_t get_ticks(void) {
 
 /**
  * Espera ocioso com base no contador ticks.
- * @param v Tempo a esperar em unidades de 1ms.
+ * Tempo a esperar em unidades de 1ms.
  */
-void delay_tempo(uint32_t v) {
+void delayms(uint32_t v) {
    uint32_t inicio = get_ticks();
    while((get_ticks() - inicio) < v) ;
+}
+
+/**
+ * Tratamento das interrupções do ARM.
+ */
+void __attribute__((interrupt("IRQ")))
+trata_irq(void) {
+   /*
+    * Verifica causa da interrupção.
+    */
+   uint32_t pend = INTPND;
+   if(bit_is_set(pend, 10)) trata_irq_timer0();
+   if(bit_is_set(pend, 4)) trata_irq_uart0_tx();
+   if(bit_is_set(pend, 0)) interr_ext0();
+   if(bit_is_set(pend, 1)) interr_ext1();
+   if(bit_is_set(pend, 2)) interr_ext2();
+   if(bit_is_set(pend, 3)) interr_ext3();
+
+   /*
+    * Reconhece todas as interrupções.
+    */
+   INTPND = pend;
 }
 
 /**
@@ -72,9 +72,36 @@ void inicia_timer0(void) {
    TCNT0 = TDATA0;
    TMOD = (TMOD & (~0b111)) | 0b011;  // ativa o timer 0
    bit_clr(INTMSK, 10);     // habilita interrupção do timer 0
-   bit_clr(INTMSK, 21);     // habilita interrupções globais 
+   bit_clr(INTMSK, 21);     // habilita interrupções globais
 }
 
+int LeGPIO(uint8_t pino){ //Leitura digital de Pino
+    return bit_is_set(IOPDATA, pino);
+}
+
+void EscreveGPIO(uint8_t pino, uint8_t valor){ //escrita digital de pino
+    if(bit_is_set(IOPMOD, pino)){
+        if(valor)
+            bit_set(IOPDATA, pino);
+        else
+            bit_clr(IOPDATA, pino);
+    }
+}
+
+void UsaGPIO(uint8_t pino, uint8_t modo){ //declaração do pino
+
+    if (modo == OUTPUT){
+        bit_set(IOPMOD, pino);
+    } else if(pino <= 11 && pino >=8 && modo >= INPUT_INTERRUPT){
+        bit_clr(IOPMOD, pino);
+        IOPCON = IOPCON | (0b11001 << (pino-8)); // interrupccao com borda de subida
+        bit_clr(INTMSK, (pino-8)); // habilita interrupção do pino
+        bit_clr(INTMSK, 21);     // habilita interrupções globais
+    }
+    else
+        bit_clr(IOPMOD, pino); // INPUT se houver exceção
+
+}
 
 /*
  * buffer de transmissão
@@ -86,8 +113,7 @@ static volatile uint8_t *ptx = NULL;     ///< Ponteiro para o próximo byte a tr
  * Tratamento da interrupção de transmissão da UART 0.
  * Função chamada por trata_irq().
  */
-void 
-trata_irq_uart0_tx(void) {
+void trata_irq_uart0_tx(void) {
    if(ntx == 0) return;
    ntx--;
    if(ntx == 0) return;
@@ -95,11 +121,7 @@ trata_irq_uart0_tx(void) {
    UTXBUF0 = *ptx;
 }
 
-/**
- * libc não está presente.
- */
-int 
-strlen(char *s) {
+int strtam(char *s) {
    int n = 0;
    while(*s) {
       n++;
@@ -110,22 +132,19 @@ strlen(char *s) {
 
 /**
  * Envia um string através da serial, usando interrupções.
- * @param str String a enviar.
  */
-void 
-serie(char *str) {
+void SerialEnvia(char *str) {
    while(ntx) ;             // verifica transmissão pendente
-   ntx = strlen(str);
+   ntx = strtam(str);
    ptx = str;
-   UTXBUF0 = str[0];        // envia o primeiro caractere.
+   UTXBUF0 = str[0];        // envia o primeiro caractere
 }
 
 /**
  * Configura a UART 0 (serial do usuário).
  * (somente transmissão)
  */
-void 
-inicia_serial(int baud) {
+void IniciaSerial(suint16_t baud) {
    ULCON0 = 0b111;           // 8N2, sem paridade, clock interno
    UCON0 = 0b1001;           // TX e RX habilitado
    if (baud == 115200){
@@ -145,7 +164,11 @@ inicia_serial(int baud) {
    } else {  	//valor de exceção para preenchimentos errados
 	UBRDIV0 = (162 << 4); // 162, valor para 9600 em 50 MHz
    }
-   
    bit_clr(INTMSK, 4);    // habilita interrupção da transmissão.
+   bit_clr(INTMSK, 5);    // habilita interrupção da recepção.
+}
+
+void svrsetup(void){
+    inicia_timer0();
 }
 
